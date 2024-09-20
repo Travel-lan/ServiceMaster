@@ -2,33 +2,17 @@
 #include <stdlib.h>
 #include "system_manager.h"
 
-int configure_nginx() {
-    printf("Настройка Nginx...\n");
-
-    int os_type = detect_os();
-    if (os_type == -1) {
-        handle_error("Неизвестная операционная система");
-        return -1;
-    }
-
-    int result;
-    if (os_type == 1) {
-        result = system("echo 'server { listen 80; server_name localhost; location / { root /var/www/html; } }' > /etc/nginx/sites-available/default");
-    } else if (os_type == 2) {
-        result = system("echo 'server { listen 80; server_name localhost; location / { root /var/www/html; } }' > /etc/nginx/nginx.conf");
-    }
+// Установка SSL через Let's Encrypt
+int setup_ssl(const char* domain) {
+    printf("Установка SSL для домена %s через Let's Encrypt...\n", domain);
+    char command[512];
+    snprintf(command, sizeof(command), "sudo apt-get install certbot python3-certbot-nginx -y && sudo certbot --nginx -d %s", domain);
+    int result = system(command);
 
     if (result != 0) {
-        handle_error("Ошибка настройки Nginx");
+        handle_error("Ошибка установки SSL");
         return -1;
     }
-
-    result = system("systemctl restart nginx");
-    if (result != 0) {
-        handle_error("Ошибка перезапуска Nginx");
-        return -1;
-    }
-
-    printf("Nginx успешно настроен и перезапущен.\n");
+    printf("SSL успешно установлен.\n");
     return 0;
 }

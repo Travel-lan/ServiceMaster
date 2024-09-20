@@ -7,7 +7,7 @@
 // Проверка прав суперпользователя
 int check_superuser_permissions() {
     if (geteuid() != 0) {
-        fprintf(stderr, "Ошибка: требуется права суперпользователя.\n");
+        fprintf(stderr, "Ошибка: требуются права суперпользователя.\n");
         return 0;
     }
     return 1;
@@ -17,7 +17,7 @@ int check_superuser_permissions() {
 int detect_os() {
     FILE *os_file = fopen("/etc/os-release", "r");
     if (!os_file) {
-        perror("Не удалось открыть файл /etc/os-release");
+        perror("Не удалось открыть /etc/os-release");
         return -1;
     }
 
@@ -29,21 +29,23 @@ int detect_os() {
         } else if (strstr(buffer, "ID=kali")) {
             fclose(os_file);
             return 2;  // Kali Linux
+        } else if (strstr(buffer, "ID=debian")) {
+            fclose(os_file);
+            return 3;  // Debian
+        } else if (strstr(buffer, "ID=centos")) {
+            fclose(os_file);
+            return 4;  // CentOS
+        } else if (strstr(buffer, "ID=fedora")) {
+            fclose(os_file);
+            return 5;  // Fedora
         }
     }
 
     fclose(os_file);
-    return -1;  // Неизвестный дистрибутив
+    return -1;  // Неизвестная ОС
 }
 
-// Проверка, установлен ли сервис
-int check_service_installed(const char *service) {
-    char command[256];
-    snprintf(command, sizeof(command), "dpkg -l | grep %s", service);
-    return system(command) == 0;
-}
-
-// Установка MariaDB в зависимости от дистрибутива
+// Установка MariaDB
 int install_mariadb() {
     int os_type = detect_os();
     if (os_type == -1) {
@@ -57,14 +59,11 @@ int install_mariadb() {
     }
 
     printf("Установка MariaDB...\n");
-
     int result;
-    if (os_type == 1) {
-        // Ubuntu
+    if (os_type == 1 || os_type == 3) {
         result = system("apt-get update && apt-get install -y mariadb-server");
-    } else if (os_type == 2) {
-        // Kali Linux
-        result = system("apt-get update && apt-get install -y mariadb-server mariadb-client");
+    } else if (os_type == 4 || os_type == 5) {
+        result = system("yum install -y mariadb-server");
     }
 
     if (result != 0) {
@@ -75,7 +74,7 @@ int install_mariadb() {
     return 0;
 }
 
-// Установка Nginx в зависимости от дистрибутива
+// Установка Nginx
 int install_nginx() {
     int os_type = detect_os();
     if (os_type == -1) {
@@ -89,8 +88,13 @@ int install_nginx() {
     }
 
     printf("Установка Nginx...\n");
+    int result;
+    if (os_type == 1 || os_type == 3) {
+        result = system("apt-get update && apt-get install -y nginx");
+    } else if (os_type == 4 || os_type == 5) {
+        result = system("yum install -y nginx");
+    }
 
-    int result = system("apt-get update && apt-get install -y nginx");
     if (result != 0) {
         handle_error("Не удалось установить Nginx");
         return -1;

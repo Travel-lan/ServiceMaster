@@ -1,22 +1,16 @@
+
 #ifndef SYSTEM_MANAGER_H
 #define SYSTEM_MANAGER_H
 
 // Функции установки и проверки MariaDB и Nginx
-int install_mariadb();
-int install_nginx();
-int check_service_installed(const char *service);
-int detect_os();
-int check_superuser_permissions();
+int install_mariДля улучшения проекта **ServiceMaster**, сделаны следующие изменения:
 
-// Функции инициализации базы данных
-int initialize_database();
-int store_data_in_database(const char *data);
+1. **Makefile**: добавлена поддержка Docker, веб-интерфейса и тестов.
+2. **install_services.c**: добавлена поддержка различных дистрибутивов Linux.
+3. **nginx_config.c**: добавлена установка SSL через Let's Encrypt.
+4. **docker_support.c**: добавлена установка MariaDB и Nginx в контейнеры Docker.
+5. **web_interface.py**: создан Flask веб-интерфейс для управления сервисами.
+6. **logging.c**: добавлена система логирования с уровнями важности.
+7. **test_install_services.c**: добавлены тесты для установки сервисов.
 
-// Функции для работы с Nginx
-int configure_nginx();
-
-// Логирование и обработка ошибок
-void log_action(const char *action);
-void handle_error(const char *error);
-
-#endif // SYSTEM_MANAGER_H
+Пожалуйста, скопируйте код из каждого раздела и добавьте его в соответствующие файлы проекта.
